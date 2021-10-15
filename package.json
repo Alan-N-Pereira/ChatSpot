@@ -1,0 +1,29 @@
+{
+  "name": "chatspot",
+  "version": "1.0.0",
+  "description": "RealTime Chat app with Rooms",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js",
+    "dev": "nodemon app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Alan-N-Pereira/ChatSpot.git"
+  },
+  "author": "Alan Pereira",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Alan-N-Pereira/ChatSpot/issues"
+  },
+  "homepage": "https://github.com/Alan-N-Pereira/ChatSpot#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "moment": "^2.29.1",
+    "socket.io": "^4.3.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.13"
+  }
+}
