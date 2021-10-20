@@ -5,7 +5,10 @@ const path = require('path');
 // Required Modules
 const express = require('express');
 const socketio = require('socket.io');
+
+// util Modules
 const formatMessage = require('./utils/messages');
+const { userJoin, getCurrentUser, userLeave, getRoomUsers } = require('./utils/users');
 
 // Initializing
 const app = express();
@@ -21,22 +24,44 @@ const botName = 'ChatSpot Bot';
 
 // Run when client connects
 io.on('connection', (socket) => {
-	console.log('New web socket connection');
+	socket.on('joinRoom', ({ username, room }) => {
+		const user = userJoin(socket.id, username, room);
 
-	// Welcomes current user
-	socket.emit('message', formatMessage(botName, 'Welcome To ChatSpot!'));
+		socket.join(user.room);
 
-	// Broadcast when a user connects
-	socket.broadcast.emit('message', formatMessage(botName, 'A user has joined the chat'));
+		// Welcomes current user
+		socket.emit('message', formatMessage(botName, 'Welcome To ChatSpot!'));
 
-	// Runs when client Disconnects
-	socket.on('disconnect', () => {
-		io.emit('message', formatMessage(botName, 'A user has left the chat'));
+		// Broadcast when a user connects
+		socket.broadcast.to(user.room).emit('message', formatMessage(botName, `${user.username} has joined the chat`));
+
+		// Send Users and Room info
+		io.to(user.room).emit('roomUsers', {
+			room: user.room,
+			users: getRoomUsers(user.room)
+		});
 	});
 
 	// Listen for chatMessage
 	socket.on('chatMessage', (msg) => {
-		io.emit('message', formatMessage('USER', msg));
+		const user = getCurrentUser(socket.id);
+
+		io.to(user.room).emit('message', formatMessage(user.username, msg));
+	});
+
+	// Runs when client Disconnects
+	socket.on('disconnect', () => {
+		const user = userLeave(socket.id);
+
+		if (user) {
+			io.to(user.room).emit('message', formatMessage(botName, `${user.username} has left the chat`));
+
+			// Send Users and Room info
+			io.to(user.room).emit('roomUsers', {
+				room: user.room,
+				users: getRoomUsers(user.room)
+			});
+		}
 	});
 });
 
